@@ -3,10 +3,8 @@ package atlan.evently.atlan.event.service;
 
 import atlan.evently.atlan.event.model.Event;
 import atlan.evently.atlan.event.repo.EventRepository;
-
 import java.time.OffsetDateTime;
 import java.util.List;
-
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
@@ -19,16 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
  * - Evicts caches on writes (create/update) to keep results fresh immediately after changes.
  *
  * Cache names used:
- *  - "eventDetail" -> single event by id
- *  - "eventListUpcoming" -> paged upcoming events
+ * - "eventDetail" -> single event by id
+ * - "eventListUpcoming" -> paged upcoming events
  *
  * Requires a CacheManager bean and @EnableCaching in configuration (e.g., Caffeine or Redis).
  */
 @Service
 public class EventService {
-
     private final EventRepository events;
-
     public EventService(EventRepository events) {
         this.events = events;
     }
@@ -68,6 +64,7 @@ public class EventService {
         return e;
     }
 
+
     /**
      * List upcoming events (paged).
      * Cache key includes page and size; keep TTL short in CacheManager and evict on writes.
@@ -77,7 +74,7 @@ public class EventService {
     @Cacheable(
             cacheNames = "eventListUpcoming",
             key = "T(java.util.Objects).hash(#page,#size)", // include all inputs that affect result
-            unless = "#result == null",
+            // unless = "#result == null",  <-- REMOVED THIS LINE
             sync = true
     )
     public List<Event> listUpcoming(int page, int size) {
@@ -89,7 +86,12 @@ public class EventService {
      * Cache by id; do not cache nulls to avoid masking not-found cases.
      */
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "eventDetail", key = "#id", unless = "#result == null", sync = true)
+    @Cacheable(
+            cacheNames = "eventDetail",
+            key = "#id",
+            // unless = "#result == null",  <-- REMOVED THIS LINE
+            sync = true
+    )
     public Event get(Long id) {
         return events.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found"));
     }

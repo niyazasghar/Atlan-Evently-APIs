@@ -3,6 +3,7 @@ package atlan.evently.atlan.booking.service;
 // src/main/java/atlan/evently/atlan/booking/service/BookingService.java
 import atlan.evently.atlan.booking.model.Booking;
 import atlan.evently.atlan.booking.repo.BookingRepository;
+import atlan.evently.atlan.caching.policy.DoNotCache;
 import atlan.evently.atlan.event.model.Event;
 import atlan.evently.atlan.event.repo.EventRepository;
 import atlan.evently.atlan.user.model.User;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
+@DoNotCache
 public class BookingService {
     private final BookingRepository bookings;
     private final EventRepository events;
@@ -24,7 +26,7 @@ public class BookingService {
         this.events = events;
         this.users = users;
     }
-
+    @DoNotCache
     @Transactional
     public Booking createBooking(Long userId, Long eventId) {
         int attempts = 0;
@@ -57,7 +59,7 @@ public class BookingService {
         b.setBookedAt(OffsetDateTime.now());
         return bookings.save(b);
     }
-
+    @DoNotCache
     @Transactional
     public Booking cancelBooking(Long bookingId) {
         Booking b = bookings.findById(bookingId)
@@ -71,8 +73,19 @@ public class BookingService {
         b.setCanceledAt(OffsetDateTime.now());
         return b;
     }
-
+    @DoNotCache
     public List<Booking> listUserBookings(Long userId) {
         return bookings.findByUser_IdOrderByBookedAtDesc(userId);
+    }
+    /**
+     * Example of a live availability check — intentionally not cached.
+     * Implementations should compute directly from DB (capacity - confirmed bookings).
+     */
+    @DoNotCache
+    public boolean isAvailable(Long eventId) {
+        Event e = events.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        long activeCount = bookings.countByEvent_IdAndStatus(e.getId(), Booking.Status.CONFIRMED);
+        return activeCount < e.getCapacity();
     }
 }

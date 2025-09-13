@@ -20,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class EventAdminService {
-
     private final EventRepository repo;
-
     public EventAdminService(EventRepository repo) {
         this.repo = repo;
     }
