@@ -1,0 +1,51 @@
+Short answer: The project hit practical challenges around container-to-DB connectivity, Flyway startup failures, exposing Swagger/health safely behind security, implementing idempotency under retries, seeding demo data, caching scope, documentation/diagrams, and load testing; each was resolved with targeted configuration, code patterns, and deployment practices listed below.
+
+DB connectivity in Docker
+Problem: The app in a container couldn’t reach PostgreSQL at localhost:5432 because localhost inside a container points to the container itself.
+
+Resolution: Switched the JDBC URL to use host.docker.internal for host DBs or the Compose service name (db) when using docker-compose, ensuring reliable name resolution across the Docker network.
+
+Flyway startup failures
+Problem: Flyway migrations failed at startup due to an unreachable datasource, cascading into JPA bean creation errors.
+
+Resolution: Corrected the datasource host for containers and, for tests, leveraged Spring Boot’s Testcontainers support or disabled migrations in a test-only profile to avoid external DB dependency during unit test phases.
+
+Swagger reachability behind security
+Problem: Swagger UI and OpenAPI JSON weren’t accessible due to security constraints or missing dependency.
+
+Resolution: Added springdoc-openapi UI and permitted /v3/api-docs/, /swagger-ui/, and /swagger-ui.html in security while keeping business APIs authenticated, using the default path /swagger-ui/index.html for verification.
+
+Health, liveness, readiness probes
+Problem: Health URLs returned 404 or were blocked, making deployments hard to validate and automate.
+
+Resolution: Enabled Actuator, exposed health endpoints, turned on probe groups for /actuator/health/liveness and /actuator/health/readiness, and (optionally) added a Docker HEALTHCHECK or Compose healthcheck to gate rollouts.
+
+Idempotency under retries/timeouts
+Problem: Retries could create duplicate bookings or inconsistent states without a robust pattern.
+
+Resolution: Required an Idempotency-Key per logical POST, stored the key alongside a request fingerprint and final response, returned the same response for exact retries, and emitted 409 on key reuse with a different payload; adopted a TTL for key records.
+
+Data seeding for demos
+Problem: Manual setup slowed demos and tests, and re-running seeds could duplicate data.
+
+Resolution: Added a demo-only CommandLineRunner to seed users/events idempotently or a Flyway seed migration using INSERT … ON CONFLICT DO NOTHING to ensure repeatable, conflict-free initialization.
+
+Caching scope and invalidation
+Problem: Frequent reads increased DB load and tail latency, but cache staleness and memory pressure were concerns.
+
+Resolution: Integrated Spring Cache with Caffeine for in-process, bounded caches with conservative TTLs on read-mostly endpoints and explicit eviction on writes that affect cached views.
+
+Dockerization and image hygiene
+Problem: Large images and environment drift complicated deployment and debugging.
+
+Resolution: Used a multi-stage Dockerfile to build with Maven and run on a JRE base image, placed the Dockerfile at the repo root as build context, and externalized environment via SPRING_* vars and profiles.
+
+k6 verification of live APIs
+Problem: Needed a repeatable way to validate API reachability and idempotency behavior in real deployments.
+
+Resolution: Wrote k6 scripts for smoke/spike and an idempotency-retry scenario, parameterized via BASE_URL and TOKEN, and ran them against the deployed base URL to assert status, body equality on retries, and thresholds.
+
+Documentation and diagrams
+Problem: Reviewers needed a concise, implementation-aligned overview and live links for fast validation.
+
+Resolution: Composed a README with trade-offs (locking/idempotency/caching/indexes), live paths for Swagger and health, k6 notes, and Mermaid diagrams for architecture and ER to keep design and code in sync
