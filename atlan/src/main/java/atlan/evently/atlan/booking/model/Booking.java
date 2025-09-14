@@ -1,7 +1,4 @@
-// src/main/java/com/evently/booking/model/Booking.java
 package atlan.evently.atlan.booking.model;
-
-// src/main/java/atlan/evently/atlan/booking/model/Booking.java
 
 import atlan.evently.atlan.user.model.User;
 import atlan.evently.atlan.event.model.Event;

@@ -1,7 +1,6 @@
 package atlan.evently.atlan.security.jwt;
 // src/main/java/atlan/evently/atlan/security/jwt/JwtAuthFilter.java
 
-
 import atlan.evently.atlan.security.DomainUserDetailsService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

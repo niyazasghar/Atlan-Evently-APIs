@@ -1,7 +1,9 @@
 package atlan.evently.atlan.analytics.view;
 
-// src/main/java/com/evently/analytics/view/EventStatsView.java
+import lombok.Data;
 
+// src/main/java/atlan/evently/atlan/analytics/view/EventStatsView.java
+@Data
 public class EventStatsView {
     private Long eventId;
     private String eventName;

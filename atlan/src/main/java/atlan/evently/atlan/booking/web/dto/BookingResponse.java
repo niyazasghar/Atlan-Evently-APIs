@@ -1,8 +1,5 @@
 package atlan.evently.atlan.booking.web.dto;
 
-// src/main/java/atlan/evently/atlan/booking/web/dto/BookingResponse.java
-
-
 import java.time.OffsetDateTime;
 import lombok.Data;
 
@@ -15,4 +12,3 @@ public class BookingResponse {
     private OffsetDateTime bookedAt;
     private OffsetDateTime canceledAt;
 }
-

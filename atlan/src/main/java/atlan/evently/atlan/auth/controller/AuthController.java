@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * REST Controller for handling user authentication and registration.
@@ -38,18 +40,20 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication Management", description = "APIs for user login and registration")
 public class AuthController {
 
+
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
     private final UserService users;
 
+
     /**
      * Constructs an AuthController with the necessary dependencies.
      *
      * @param authManager The Spring Security AuthenticationManager to process credentials.
-     * @param jwtService  The service responsible for generating JWTs.
-     * @param encoder     The service for hashing passwords.
-     * @param users       The service for user data access and creation.
+     * @param jwtService The service responsible for generating JWTs.
+     * @param encoder The service for hashing passwords.
+     * @param users The service for user data access and creation.
      */
     public AuthController(AuthenticationManager authManager, JwtService jwtService,
                           PasswordEncoder encoder, UserService users) {
@@ -58,6 +62,7 @@ public class AuthController {
         this.encoder = encoder;
         this.users = users;
     }
+
 
     /**
      * Authenticates a user and returns a JWT upon success.
@@ -73,6 +78,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Authentication successful", content = { @Content(schema = @Schema(implementation = AuthResponse.class), mediaType = "application/json") }),
             @ApiResponse(responseCode = "401", description = "Unauthorized, invalid credentials", content = { @Content(schema = @Schema()) })
     })
+    @SecurityRequirements // removes inherited/global security for this operation
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest req) {
         try {
@@ -82,7 +88,8 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        // After successful authentication, fetch user details from the database to build the token
+
+// After successful authentication, fetch user details from the database to build the token
         var domainUser = users.findByEmail(req.getEmail()).orElseThrow();
         var userDetails = org.springframework.security.core.userdetails.User
                 .withUsername(domainUser.getEmail())
@@ -90,9 +97,11 @@ public class AuthController {
                 .authorities("ROLE_" + domainUser.getRole().name())
                 .build();
 
+
         String token = jwtService.generateToken(userDetails);
         return ResponseEntity.ok(new AuthResponse(token));
     }
+
 
     /**
      * Registers a new user with a securely hashed password.
@@ -110,20 +119,25 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid input, such as a malformed email", content = { @Content(schema = @Schema()) }),
             @ApiResponse(responseCode = "409", description = "Conflict, the email is already registered", content = { @Content(schema = @Schema()) })
     })
+    @SecurityRequirements // removes inherited/global security for this operation
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRegisterRequest req) {
         User.Role role = "ADMIN".equalsIgnoreCase(req.getRole()) ? User.Role.ADMIN : User.Role.USER;
 
-        // --- FIX IS HERE ---
-        // 1. Get the plain-text password from the request
+
+// --- FIX IS HERE ---
+// 1. Get the plain-text password from the request
         String plainPassword = req.getPassword();
 
-        // 2. Hash the password using the encoder
+
+// 2. Hash the password using the encoder
         String hashedPassword = encoder.encode(plainPassword);
 
-        // 3. Save the HASHED password to the database, not the plain one
+
+// 3. Save the HASHED password to the database, not the plain one
         User entity = users.register(req.getEmail(), hashedPassword, role);
-        // --- END OF FIX ---
+// --- END OF FIX ---
+
 
         return ResponseEntity.ok(UserMapper.toResponse(entity));
     }
