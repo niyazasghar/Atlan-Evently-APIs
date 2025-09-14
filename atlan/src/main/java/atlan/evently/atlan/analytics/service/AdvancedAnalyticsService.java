@@ -18,10 +18,14 @@ public class AdvancedAnalyticsService {
 
     private final EventRepository eventRepo;
     private final BookingRepository bookingRepo;
+    private final BookingAnalyticsRepository bookingAnalyticsRepo; // NEW
 
-    public AdvancedAnalyticsService(EventRepository eventRepo, BookingRepository bookingRepo) {
+    public AdvancedAnalyticsService(EventRepository eventRepo,
+                                    BookingRepository bookingRepo,
+                                    BookingAnalyticsRepository bookingAnalyticsRepo) { // NEW
         this.eventRepo = eventRepo;
         this.bookingRepo = bookingRepo;
+        this.bookingAnalyticsRepo = bookingAnalyticsRepo; // NEW
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +49,7 @@ public class AdvancedAnalyticsService {
 
     @Transactional(readOnly = true)
     public List<DailyStatView> daily(LocalDate from, LocalDate to) {
-        List<BookingAnalyticsRepository.DailyStatRow> rows = ((BookingAnalyticsRepository) bookingRepo).dailyStats(from, to);
+        var rows = bookingAnalyticsRepo.dailyStats(from, to); // FIX: no cast
         return rows.stream()
                 .map(r -> new DailyStatView(r.getDay(), r.getBookings(), r.getCancellations()))
                 .toList();

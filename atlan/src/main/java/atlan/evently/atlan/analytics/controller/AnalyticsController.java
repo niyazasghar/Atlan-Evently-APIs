@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/v1/analytics")
 @Tag(
-        name = "Analytics",
+        name = "User Analytics ",
         description = "Public analytics for events: per‑event stats, overall summary, and popular events"
 )
 @Validated

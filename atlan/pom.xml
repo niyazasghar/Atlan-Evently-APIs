@@ -70,15 +70,7 @@
 			<version>2.7.0</version>
 		</dependency>
 
-		<!-- Database migrations (Flyway core + Postgres support) -->
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-		</dependency>
+
 
 		<!-- PostgreSQL JDBC driver (runtime only) -->
 		<dependency>
@@ -127,6 +119,16 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.2</version>
 		</dependency>
 
 		<!-- TEST DEPENDENCIES -->

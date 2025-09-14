@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST Controller for managing event bookings.
- */
 @RestController
 @RequestMapping("/api/v1/bookings")
 @SecurityRequirement(name = "bearerAuth")
@@ -66,6 +63,9 @@ public class BookingController {
         );
     }
 
+    // DEPRECATED: Keep commented to simplify API (use DELETE /{id}/cancel instead).
+    // Reason: Redundant with the canonical cancel endpoint; kept only as reference.
+    /*
     @Operation(summary = "Cancel an existing booking (legacy)",
             description = "Marks the specified booking as cancelled and frees a seat; same semantics as /{id}/cancel.")
     @ApiResponses({
@@ -81,7 +81,10 @@ public class BookingController {
         Booking booking = bookings.cancelBooking(id, requesterUserId, isAdmin);
         return ResponseEntity.ok(BookingMapper.toResponse(booking));
     }
+    */
 
+    // DEPRECATED: Use DELETE /{id}/cancel; POST kept commented to avoid multiple ways to cancel.
+    /*
     @Operation(summary = "Cancel booking (POST)",
             description = "Cancels the booking and frees a seat within one transaction; returns the updated booking.")
     @ApiResponses({
@@ -98,9 +101,10 @@ public class BookingController {
         Booking booking = bookings.cancelBooking(id, requesterUserId, isAdmin);
         return ResponseEntity.ok(BookingMapper.toResponse(booking));
     }
+    */
 
-    @Operation(summary = "Cancel booking (DELETE)",
-            description = "Cancels the booking and frees a seat within one transaction; returns the updated booking.")
+    @Operation(summary = "Cancel booking",
+            description = "Cancels the booking and frees a seat within one transaction; idempotent and retry-safe.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Booking cancelled successfully",
                     content = @Content(schema = @Schema(implementation = BookingResponse.class))),
@@ -131,7 +135,7 @@ public class BookingController {
 
     private Long resolveRequesterUserId(Authentication auth) {
         if (auth == null) return null;
-        String username = auth.getName(); // subject set by JwtAuthFilter (typically email/username)
+        String username = auth.getName();
         return users.findByEmail(username).map(User::getId).orElse(null);
     }
 

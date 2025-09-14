@@ -1,8 +1,10 @@
 // src/main/java/atlan/evently/atlan/waitlist/web/dto/WaitlistItemResponse.java
 package atlan.evently.atlan.waitlist.web.dto;
 
-import java.time.OffsetDateTime;
+import lombok.Data;
 
+import java.time.OffsetDateTime;
+@Data
 public class WaitlistItemResponse {
     private Long id;
     private Long eventId;

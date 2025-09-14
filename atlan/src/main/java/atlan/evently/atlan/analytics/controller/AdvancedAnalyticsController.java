@@ -137,47 +137,47 @@ public class AdvancedAnalyticsController {
         return ResponseEntity.ok(svc.cancellationRates());
     }
 
-    @Operation(
-            summary = "Daily booking statistics",
-            description = "Returns day-by-day counts of bookings and cancellations for the given date range [from, to]. Admin-only."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Daily stats fetched successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = DailyStatView.class)),
-                            examples = @ExampleObject(value = """
-                [
-                  {"day": "2025-09-01", "bookings": 45, "cancellations": 3},
-                  {"day": "2025-09-02", "bookings": 52, "cancellations": 6}
-                ]
-                """)
-                    )
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid dates (format or range)"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized (missing/invalid token)"),
-            @ApiResponse(responseCode = "403", description = "Forbidden (requires ROLE_ADMIN)"),
-            @ApiResponse(responseCode = "500", description = "Unexpected error")
-    })
-    @GetMapping("/daily-stats")
-    public ResponseEntity<List<DailyStatView>> daily(
-            @Parameter(
-                    name = "from",
-                    description = "Start date (inclusive), ISO-8601 format yyyy-MM-dd",
-                    example = "2025-09-01",
-                    in = ParameterIn.QUERY
-            )
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @Parameter(
-                    name = "to",
-                    description = "End date (inclusive), ISO-8601 format yyyy-MM-dd",
-                    example = "2025-09-30",
-                    in = ParameterIn.QUERY
-            )
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-    ) {
-        return ResponseEntity.ok(svc.daily(from, to));
-    }
+//    @Operation(
+//            summary = "Daily booking statistics",
+//            description = "Returns day-by-day counts of bookings and cancellations for the given date range [from, to]. Admin-only."
+//    )
+//    @ApiResponses({
+//            @ApiResponse(
+//                    responseCode = "200",
+//                    description = "Daily stats fetched successfully",
+//                    content = @Content(
+//                            mediaType = "application/json",
+//                            array = @ArraySchema(schema = @Schema(implementation = DailyStatView.class)),
+//                            examples = @ExampleObject(value = """
+//                [
+//                  {"day": "2025-09-01", "bookings": 45, "cancellations": 3},
+//                  {"day": "2025-09-02", "bookings": 52, "cancellations": 6}
+//                ]
+//                """)
+//                    )
+//            ),
+//            @ApiResponse(responseCode = "400", description = "Invalid dates (format or range)"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized (missing/invalid token)"),
+//            @ApiResponse(responseCode = "403", description = "Forbidden (requires ROLE_ADMIN)"),
+//            @ApiResponse(responseCode = "500", description = "Unexpected error")
+//    })
+//    @GetMapping("/daily-stats")
+//    public ResponseEntity<List<DailyStatView>> daily(
+//            @Parameter(
+//                    name = "from",
+//                    description = "Start date (inclusive), ISO-8601 format yyyy-MM-dd",
+//                    example = "2025-09-01",
+//                    in = ParameterIn.QUERY
+//            )
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+//            @Parameter(
+//                    name = "to",
+//                    description = "End date (inclusive), ISO-8601 format yyyy-MM-dd",
+//                    example = "2025-09-30",
+//                    in = ParameterIn.QUERY
+//            )
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+//    ) {
+//        return ResponseEntity.ok(svc.daily(from, to));
+//    }
 }
